@@ -231,7 +231,7 @@ module.exports = function(mongoose) {
    *   temporary user already exists, then null is returned in its place
    * @return {function} returns the callback function
    */
-  var createTempUser = function(user, callback) {
+  var createTempConsultation = function(user, callback) {
     if (!options.tempUserModel) {
       return callback(new TypeError('Temporary user model not defined. Either you forgot' +
         'to generate one or you did not predefine one.'), null);
@@ -262,10 +262,10 @@ module.exports = function(mongoose) {
         return callback(err, null, null);
       }
 
-      // user has already signed up and confirmed their account
+      /* user has already signed up and confirmed their account
       if (existingPersistentUser) {
         return callback(null, existingPersistentUser, null);
-      }
+      }*/
 
       options.tempUserModel.findOne(query, function(err, existingTempUser) {
         if (err) {
