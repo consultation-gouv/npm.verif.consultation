@@ -40,13 +40,13 @@ module.exports = function(mongoose) {
 
   // default options
   var options = {
-    verificationURL: 'http://example.com/email-verification/${URL}',
+    verificationURL: 'http://example.com/verification/${URL}',
     URLLength: 48,
 
     // mongo-stuff
-    persistentUserModel: null,
-    tempUserModel: null,
-    tempUserCollection: 'temporary_users',
+    persistentConsultationModel: null,
+    tempConsultationModel: null,
+    tempConsultationCollection: 'temporary_consultations',
     emailFieldName: 'email',
     passwordFieldName: 'password',
     URLFieldName: 'GENERATED_VERIFYING_URL',
@@ -56,12 +56,12 @@ module.exports = function(mongoose) {
     transportOptions: {
       service: 'Gmail',
       auth: {
-        user: 'user@gmail.com',
+        consultation: 'consultation@gmail.com',
         pass: 'password'
       }
     },
     verifyMailOptions: {
-      from: 'Do Not Reply <user@gmail.com>',
+      from: 'Do Not Reply <consultation@gmail.com>',
       subject: 'Confirm your account',
       html: '<p>Please verify your account by clicking <a href="${URL}">this link</a>. If you are unable to do so, copy and ' +
         'paste the following link into your browser:</p><p>${URL}</p>',
@@ -76,7 +76,7 @@ module.exports = function(mongoose) {
     },
     shouldSendConfirmation: true,
     confirmMailOptions: {
-      from: 'Do Not Reply <user@gmail.com>',
+      from: 'Do Not Reply <consultation@gmail.com>',
       subject: 'Successfully verified!',
       html: '<p>Your account has been successfully verified.</p>',
       text: 'Your account has been successfully verified.'
@@ -122,8 +122,8 @@ module.exports = function(mongoose) {
       err = err || new Error('URLLength must be a positive integer');
     }
 
-    if (typeof options.tempUserCollection !== 'string') {
-      err = err || createOptionError('tempUserCollection', options.tempUserCollection, 'string');
+    if (typeof options.tempConsultationCollection !== 'string') {
+      err = err || createOptionError('tempConsultationCollection', options.tempConsultationCollection, 'string');
     }
 
     if (typeof options.emailFieldName !== 'string') {
@@ -153,87 +153,87 @@ module.exports = function(mongoose) {
 
 
   /**
-   * Create a Mongoose Model for the temporary user, based off of the persistent
-   * User model, i.e. the temporary user inherits the persistent user. An
+   * Create a Mongoose Model for the temporary consultation based off of the persistent
+   * Consultation model, i.e. the temporaryconsultaion inherits the persistent consultation. An
    * additional field for the URL is created, as well as a TTL.
    *
-   * @func generateTempUserModel
-   * @param {object} User - the persistent User model.
-   * @return {object} the temporary user model
+   * @func generateTempConsultationModel
+   * @param {object} Consultation - the persistent Consultation model.
+   * @return {object} the temporary consultation model
    */
-  var generateTempUserModel = function(User, callback) {
-    if (!User) {
-      return callback(new TypeError('Persistent user model undefined.'), null);
+  var generateTempConsultationModel = function(Consultation, callback) {
+    if (!Consultation) {
+      return callback(new TypeError('Persistent consultation model undefined.'), null);
     }
-    var tempUserSchemaObject = {}, // a copy of the schema
-      tempUserSchema;
+    var tempConsultationSchemaObject = {}, // a copy of the schema
+      tempConsultationSchema;
 
     // copy over the attributes of the schema
-    Object.keys(User.schema.paths).forEach(function(field) {
-      tempUserSchemaObject[field] = User.schema.paths[field].options;
+    Object.keys(Consultation.schema.paths).forEach(function(field) {
+      tempConsultationSchemaObject[field] = Consultation.schema.paths[field].options;
     });
-    tempUserSchemaObject[options.URLFieldName] = String;
+    tempConsultationSchemaObject[options.URLFieldName] = String;
 
     // create a TTL
-    tempUserSchemaObject.createdAt = {
+    tempConsultationSchemaObject.createdAt = {
       type: Date,
       expires: options.expirationTime.toString() + 's',
       default: Date.now
     };
 
-    tempUserSchema = mongoose.Schema(tempUserSchemaObject);
+    tempConsultationSchema = mongoose.Schema(tempConsultationSchemaObject);
 
     // copy over the methods of the schema
-    Object.keys(User.schema.methods).forEach(function(meth) { // tread lightly
-      tempUserSchema.methods[meth] = User.schema.methods[meth];
+    Object.keys(Consultation.schema.methods).forEach(function(meth) { // tread lightly
+      tempConsultationSchema.methods[meth] = Consultation.schema.methods[meth];
     });
 
-    options.tempUserModel = mongoose.model(options.tempUserCollection, tempUserSchema);
+    options.tempConsultationModel = mongoose.model(options.tempConsultationCollection, tempConsultationSchema);
 
-    return callback(null, mongoose.model(options.tempUserCollection));
+    return callback(null, mongoose.model(options.tempConsultationCollection));
   };
 
 
   /**
-   * Helper function for actually inserting the temporary user into the database.
+   * Helper function for actually inserting the temporary consultation into the database.
    *
-   * @func insertTempUser
-   * @param {string} password - the user's password, possibly hashed
-   * @param {object} tempUserData - the temporary user's data
+   * @func insertTempConsultation
+   * @param {string} password - the consultation's password, possibly hashed
+   * @param {object} tempConsultationData - the temporary consultation's data
    * @param {function} callback - a callback function, which takes an error and the
-   *   temporary user object as params
+   *   temporary consultation object as params
    * @return {function} returns the callback function
    */
-  var insertTempUser = function(password, tempUserData, callback) {
+  var insertTempConsultation = function(password, tempConsultationData, callback) {
     // password may or may not be hashed
-    tempUserData[options.passwordFieldName] = password;
-    var newTempUser = new options.tempUserModel(tempUserData);
+    tempConsultationData[options.passwordFieldName] = password;
+    var newTempConsultation = new options.tempConsultationModel(tempConsultationData);
 
-    newTempUser.save(function(err, tempUser) {
+    newTempConsultation.save(function(err, tempConsultation) {
       if (err) {
         return callback(err, null, null);
       }
-      return callback(null, null, tempUser);
+      return callback(null, null, tempConsultation);
     });
   };
 
 
   /**
-   * Attempt to create an instance of a temporary user based off of an instance of a
-   * persistent user. If user already exists in the temporary collection, passes null
+   * Attempt to create an instance of a temporary consult based off of an instance of a
+   * persistent Consultation. If a consultation (identified by consultation email) already exists in the temporary collection, passes null
    * to the callback function; otherwise, passes the instance to the callback, with a
    * randomly generated URL associated to it.
    *
-   * @func createTempUser
-   * @param {object} user - an instance of the persistent User model
+   * @func createTempConsultation
+   * @param {object} consultation - an instance of the persistent Consultation model
    * @param {function} callback - a callback function that takes an error (if one exists),
-   *   a persistent user (if it exists) and the new temporary user as arguments; if the
-   *   temporary user already exists, then null is returned in its place
+   *   a persistent consultation (if it exists) and the new temporary consultation as arguments; if the
+   *   temporary consultation already exists, then null is returned in its place
    * @return {function} returns the callback function
    */
-  var createTempConsultation = function(user, callback) {
-    if (!options.tempUserModel) {
-      return callback(new TypeError('Temporary user model not defined. Either you forgot' +
+  var createTempConsultation = function(consultation, callback) {
+    if (!options.tempConsultationModel) {
+      return callback(new TypeError('Temporary consultation model not defined. Either you forgot' +
         'to generate one or you did not predefine one.'), null);
     }
 
@@ -245,52 +245,46 @@ module.exports = function(mongoose) {
       query[levels[0]] = {};
 
       var queryObj = query[levels[0]];
-      var userObj = user[levels[0]];
+      var consultationObj = consultation[levels[0]];
       for(var i=0; i<levels.length; i++){
         queryObj[levels[i+1]] = {};
         queryObj = queryObj[levels[i+1]];
-        userObj = userObj[levels[i+1]];
+        consultationObj = consultationObj[levels[i+1]];
       }
 
-      queryObj = userObj;
+      queryObj = consultationObj;
     }else {
-      query[options.emailFieldName] = user[options.emailFieldName];
+      query[options.emailFieldName] = consultation[options.emailFieldName];
     }
 
-    options.persistentUserModel.findOne(query, function(err, existingPersistentUser) {
+    options.persistentConsultationModel.findOne(query, function(err, existingPersistentConsultation) {
       if (err) {
         return callback(err, null, null);
       }
 
-      /* user has already signed up and confirmed their account
-      if (existingPersistentUser) {
-        return callback(null, existingPersistentUser, null);
+      /* consultation has already signed up and confirmed their account
+      if (existingPersistentConsultation) {
+        return callback(null, existingPersistentConsultation, null);
       }*/
 
-      options.tempUserModel.findOne(query, function(err, existingTempUser) {
+      options.tempConsultationModel.findOne(query, function(err, existingTempConsultation) {
         if (err) {
           return callback(err, null, null);
         }
 
-        // user has already signed up but not yet confirmed their account
-        if (existingTempUser) {
+        // consultation has already signed up but not yet confirmed their account
+        if (existingTempConsultation) {
           return callback(null, null, null);
         } else {
-          var tempUserData = {};
+          var tempConsultationData = {};
 
-          // copy the credentials for the user
-          Object.keys(user._doc).forEach(function(field) {
-            tempUserData[field] = user[field];
+          // copy the credentials for the consultation
+          Object.keys(consultation._doc).forEach(function(field) {
+            tempConsultationData[field] = consultation[field];
           });
 
-          tempUserData[options.URLFieldName] = randtoken.generate(options.URLLength);
+          tempConsultationData[options.URLFieldName] = randtoken.generate(options.URLLength);
 
-          if (options.hashingFunction) {
-            return options.hashingFunction(tempUserData[options.passwordFieldName], tempUserData,
-              insertTempUser, callback);
-          } else {
-            return insertTempUser(tempUserData[options.passwordFieldName], tempUserData, callback);
-          }
         }
       });
     });
@@ -298,11 +292,11 @@ module.exports = function(mongoose) {
 
 
   /**
-   * Send an email to the user requesting confirmation.
+   * Send an email to the consultation requesting confirmation.
    *
    * @func sendVerificationEmail
-   * @param {string} email - the user's email address.
-   * @param {string} url - the unique url generated for the user.
+   * @param {string} email - the consultation's email address.
+   * @param {string} url - the unique url generated for the consultation.
    * @param {function} callback - the callback to pass to Nodemailer's transporter
    */
   var sendVerificationEmail = function(email, url, callback) {
@@ -324,10 +318,10 @@ module.exports = function(mongoose) {
   };
 
   /**
-   * Send an email to the user requesting confirmation.
+   * Send an email to the consultation requesting confirmation.
    *
    * @func sendConfirmationEmail
-   * @param {string} email - the user's email address.
+   * @param {string} email - the consultation's email address.
    * @param {function} callback - the callback to pass to Nodemailer's transporter
    */
   var sendConfirmationEmail = function(email, callback) {
@@ -340,51 +334,51 @@ module.exports = function(mongoose) {
   };
 
   /**
-   * Transfer a temporary user from the temporary collection to the persistent
-   * user collection, removing the URL assigned to it.
+   * Transfer a temporary consultation from the temporary collection to the persistent
+   * consultation collection, removing the URL assigned to it.
    *
-   * @func confirmTempUser
+   * @func confirmTempConsultation
    * @param {string} url - the randomly generated URL assigned to a unique email
    */
-  var confirmTempUser = function(url, callback) {
-    var TempUser = options.tempUserModel,
+  var confirmTempConsultation = function(url, callback) {
+    var TempConsultation = options.tempConsultationModel,
       query = {};
     query[options.URLFieldName] = url;
 
-    TempUser.findOne(query, function(err, tempUserData) {
+    TempConsultation.findOne(query, function(err, tempConsultationData) {
       if (err) {
         return callback(err, null);
       }
 
-      // temp user is found (i.e. user accessed URL before their data expired)
-      if (tempUserData) {
-        var userData = JSON.parse(JSON.stringify(tempUserData)), // copy data
-          User = options.persistentUserModel,
-          user;
+      // temp consultation is found (i.e. consultation accessed URL before their data expired)
+      if (tempConsultationData) {
+        var consultationData = JSON.parse(JSON.stringify(tempConsultationData)), // copy data
+          Consultation = options.persistentConsultationModel,
+          consultation;
 
-        delete userData[options.URLFieldName];
-        user = new User(userData);
+        delete consultationData[options.URLFieldName];
+        consultation = new Consultation(consultationData);
 
-        // save the temporary user to the persistent user collection
-        user.save(function(err, savedUser) {
+        // save the temporary consultation to the persistent consultation collection
+        consultation.save(function(err, savedConsultation) {
           if (err) {
             return callback(err, null);
           }
 
-          TempUser.remove(query, function(err) {
+          TempConsultation.remove(query, function(err) {
             if (err) {
               return callback(err, null);
             }
 
             if (options.shouldSendConfirmation) {
-              sendConfirmationEmail(savedUser.email, null);
+              sendConfirmationEmail(savedConsultation.email, null);
             }
-            return callback(null, user);
+            return callback(null, consultation);
           });
         });
 
 
-        // temp user is not found (i.e. user accessed URL after data expired, or something else...)
+        // temp consultation is not found (i.e. consultation accessed URL after data expired, or something else...)
       } else {
         return callback(null, null);
       }
@@ -393,30 +387,30 @@ module.exports = function(mongoose) {
 
 
   /**
-   * Resend the verification email to the user given only their email.
+   * Resend the verification email to the consultation given only their email.
    *
    * @func resendVerificationEmail
-   * @param {object} email - the user's email address
+   * @param {object} email - the consultaiton's email address
    */
   var resendVerificationEmail = function(email, callback) {
     var query = {};
     query[options.emailFieldName] = email;
 
-    options.tempUserModel.findOne(query, function(err, tempUser) {
+    options.tempConsultationModel.findOne(query, function(err, tempConsultation) {
       if (err) {
         return callback(err, null);
       }
 
-      // user found (i.e. user re-requested verification email before expiration)
-      if (tempUser) {
-        // generate new user token
-        tempUser[options.URLFieldName] = randtoken.generate(options.URLLength);
-        tempUser.save(function(err) {
+      // consultation found (i.e. consultation re-requested verification email before expiration)
+      if (tempConsultation) {
+        // generate new consultation token
+        tempConsultation[options.URLFieldName] = randtoken.generate(options.URLLength);
+        tempConsultation.save(function(err) {
           if (err) {
             return callback(err, null);
           }
 
-          sendVerificationEmail(getNestedValue(tempUser, options.emailFieldName), tempUser[options.URLFieldName], function(err) {
+          sendVerificationEmail(getNestedValue(tempConsultation, options.emailFieldName), tempConsultation[options.URLFieldName], function(err) {
             if (err) {
               return callback(err, null);
             }
@@ -434,9 +428,9 @@ module.exports = function(mongoose) {
   return {
     options: options,
     configure: configure,
-    generateTempUserModel: generateTempUserModel,
-    createTempUser: createTempUser,
-    confirmTempUser: confirmTempUser,
+    generateTempConsultationModel: generateTempConsultationModel,
+    createTempConsultation: createTempConsultation,
+    confirmTempConsultation: confirmTempConsultation,
     resendVerificationEmail: resendVerificationEmail,
     sendConfirmationEmail: sendConfirmationEmail,
     sendVerificationEmail: sendVerificationEmail,
