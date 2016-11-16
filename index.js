@@ -40,7 +40,7 @@ module.exports = function(mongoose) {
 
   // default options
   var options = {
-    verificationURL: 'http://example.com/verification/${URL}',
+    verificationURL: 'http://example.com/email-verification/${URL}',
     URLLength: 48,
 
     // mongo-stuff
@@ -56,12 +56,12 @@ module.exports = function(mongoose) {
     transportOptions: {
       service: 'Gmail',
       auth: {
-        consultation: 'consultation@gmail.com',
+        user: 'user@gmail.com',
         pass: 'password'
       }
     },
     verifyMailOptions: {
-      from: 'Do Not Reply <consultation@gmail.com>',
+      from: 'Do Not Reply <user@gmail.com>',
       subject: 'Confirm your account',
       html: '<p>Please verify your account by clicking <a href="${URL}">this link</a>. If you are unable to do so, copy and ' +
         'paste the following link into your browser:</p><p>${URL}</p>',
@@ -76,7 +76,7 @@ module.exports = function(mongoose) {
     },
     shouldSendConfirmation: true,
     confirmMailOptions: {
-      from: 'Do Not Reply <consultation@gmail.com>',
+      from: 'Do Not Reply <user@gmail.com>',
       subject: 'Successfully verified!',
       html: '<p>Your account has been successfully verified.</p>',
       text: 'Your account has been successfully verified.'
@@ -153,8 +153,8 @@ module.exports = function(mongoose) {
 
 
   /**
-   * Create a Mongoose Model for the temporary consultation based off of the persistent
-   * Consultation model, i.e. the temporaryconsultaion inherits the persistent consultation. An
+   * Create a Mongoose Model for the temporary consultation, based off of the persistent
+   * Consultation model, i.e. the temporary consultation inherits the persistent consultation. An
    * additional field for the URL is created, as well as a TTL.
    *
    * @func generateTempConsultationModel
@@ -198,7 +198,7 @@ module.exports = function(mongoose) {
    * Helper function for actually inserting the temporary consultation into the database.
    *
    * @func insertTempConsultation
-   * @param {string} password - the consultation's password, possibly hashed
+   * @param {string} password - the user's password, possibly hashed (delete ?)
    * @param {object} tempConsultationData - the temporary consultation's data
    * @param {function} callback - a callback function, which takes an error and the
    *   temporary consultation object as params
@@ -219,8 +219,8 @@ module.exports = function(mongoose) {
 
 
   /**
-   * Attempt to create an instance of a temporary consult based off of an instance of a
-   * persistent Consultation. If a consultation (identified by consultation email) already exists in the temporary collection, passes null
+   * Attempt to create an instance of a temporary consultation based off of an instance of a
+   * persistent consultation. If consultation already exists in the temporary collection, passes null
    * to the callback function; otherwise, passes the instance to the callback, with a
    * randomly generated URL associated to it.
    *
@@ -262,17 +262,13 @@ module.exports = function(mongoose) {
         return callback(err, null, null);
       }
 
-      /* consultation has already signed up and confirmed their account
-      if (existingPersistentConsultation) {
-        return callback(null, existingPersistentConsultation, null);
-      }*/
 
       options.tempConsultationModel.findOne(query, function(err, existingTempConsultation) {
         if (err) {
           return callback(err, null, null);
         }
 
-        // consultation has already signed up but not yet confirmed their account
+        // consultation has already been submitted but not yet confirmed 
         if (existingTempConsultation) {
           return callback(null, null, null);
         } else {
@@ -285,6 +281,12 @@ module.exports = function(mongoose) {
 
           tempConsultationData[options.URLFieldName] = randtoken.generate(options.URLLength);
 
+          if (options.hashingFunction) {
+            return options.hashingFunction(tempConsultationData[options.passwordFieldName], tempConsultationData,
+              insertTempConsultation, callback);
+          } else {
+            return insertTempConsultation(tempConsultationData[options.passwordFieldName], tempConsultationData, callback);
+          }
         }
       });
     });
@@ -292,11 +294,11 @@ module.exports = function(mongoose) {
 
 
   /**
-   * Send an email to the consultation requesting confirmation.
+   * Send a message to the email associated with the consultation requesting confirmation.
    *
    * @func sendVerificationEmail
-   * @param {string} email - the consultation's email address.
-   * @param {string} url - the unique url generated for the consultation.
+   * @param {string} email - the user's email address.
+   * @param {string} url - the unique url generated for the user.
    * @param {function} callback - the callback to pass to Nodemailer's transporter
    */
   var sendVerificationEmail = function(email, url, callback) {
@@ -318,10 +320,10 @@ module.exports = function(mongoose) {
   };
 
   /**
-   * Send an email to the consultation requesting confirmation.
+   * Send an email to the user requesting confirmation.
    *
    * @func sendConfirmationEmail
-   * @param {string} email - the consultation's email address.
+   * @param {string} email - the user's email address.
    * @param {function} callback - the callback to pass to Nodemailer's transporter
    */
   var sendConfirmationEmail = function(email, callback) {
@@ -350,7 +352,7 @@ module.exports = function(mongoose) {
         return callback(err, null);
       }
 
-      // temp consultation is found (i.e. consultation accessed URL before their data expired)
+      // temp consultation is found (i.e. user accessed URL before their data expired)
       if (tempConsultationData) {
         var consultationData = JSON.parse(JSON.stringify(tempConsultationData)), // copy data
           Consultation = options.persistentConsultationModel,
@@ -378,7 +380,7 @@ module.exports = function(mongoose) {
         });
 
 
-        // temp consultation is not found (i.e. consultation accessed URL after data expired, or something else...)
+        // temp consultation is not found (i.e. user accessed URL after data expired, or something else...)
       } else {
         return callback(null, null);
       }
@@ -387,10 +389,10 @@ module.exports = function(mongoose) {
 
 
   /**
-   * Resend the verification email to the consultation given only their email.
+   * Resend the verification email to the user given only their email.
    *
    * @func resendVerificationEmail
-   * @param {object} email - the consultaiton's email address
+   * @param {object} email - the user's email address
    */
   var resendVerificationEmail = function(email, callback) {
     var query = {};
@@ -401,9 +403,9 @@ module.exports = function(mongoose) {
         return callback(err, null);
       }
 
-      // consultation found (i.e. consultation re-requested verification email before expiration)
+      // user found (i.e. user re-requested verification email before expiration)
       if (tempConsultation) {
-        // generate new consultation token
+        // generate new consultaiton token
         tempConsultation[options.URLFieldName] = randtoken.generate(options.URLLength);
         tempConsultation.save(function(err) {
           if (err) {
