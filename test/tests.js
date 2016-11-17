@@ -2,20 +2,20 @@ var should = require('chai').should();
 var mongoose = require('mongoose');
 var nev = require('../index')(mongoose);
 var stubTransport = require('nodemailer-stub-transport');
-var user = require('../examples/express/app/userModel'); // sample user schema
+var consultation = require('../examples/express/app/consultationModel'); // sample consultation schema
 mongoose.connect('mongodb://localhost/test_database'); // needed for testing
 
 describe('config & set up tests', function() {
 
-  var tempUserModel;
+    var tempConsultationModel;
 
-  it('Generates a temp user model', function(done) {
-    nev.generateTempUserModel(user, function(err, generatedTempUserModel) {
-      tempUserModel = generatedTempUserModel;
-      done();
+    it('Generates a temp consultation model', function(done) {
+      nev.generateTempConsultationModel(consultation, function(err, generatedTempConsultationModel) {
+        tempConsultationModel = generatedTempConsultationModel;
+        done();
+      });
     });
-  });
-
+  
   describe('Test configuration error throwing', function() {
 
     var defaultOptions;
@@ -31,9 +31,8 @@ describe('config & set up tests', function() {
       {field: 'URLLength', wrongValue: 'str', reason: 'type'},
       {field: 'URLLength', wrongValue: -20, reason: 'value'},
       {field: 'URLLength', wrongValue: 5.5, reason: 'value'},
-      {field: 'tempUserCollection', wrongValue: null, reason: 'type'},
+      {field: 'tempConsultationCollection', wrongValue: null, reason: 'type'},
       {field: 'emailFieldName', wrongValue: [], reason: 'type'},
-      {field: 'passwordFieldName', wrongValue: {}, reason: 'type'},
       {field: 'URLFieldName', wrongValue: 5.5, reason: 'type'},
       {field: 'expirationTime', wrongValue: '100', reason: 'type'},
       {field: 'expirationTime', wrongValue: -42, reason: 'value'},
@@ -54,10 +53,10 @@ describe('config & set up tests', function() {
 
     after(function(done) {
       var newOptions = JSON.parse(JSON.stringify(defaultOptions));
-      newOptions.tempUserModel = tempUserModel;
+      newOptions.tempConsultationModel = tempConsultationModel;
       newOptions.transportOptions = stubTransport();
-      newOptions.persistentUserModel = user;
-      newOptions.passwordFieldName = 'pw';
+      newOptions.persistentConsultationModel = consultation;
+//      newOptions.passwordFieldName = 'pw';
       nev.configure(newOptions, done);
     });
   });
@@ -66,51 +65,47 @@ describe('config & set up tests', function() {
 
 describe('MongoDB tests', function() {
 
-  var newUser, newUserURL;
+  var newConsultation, newConsultationURL;
 
   before(function(done) {
-    newUser = new user({
-      email: 'foobar@fizzbuzz.com',
-      pw: 'pass'
+    newConsultation = new consultation({
+      email: 'foobar@fizzbuzz.com'
     });
 
     done();
   });
 
-  it('should create a temporary user (createTempUser())', function(done) {
-    nev.createTempUser(newUser, function(err, existingPersistentUser, newTempUser) {
+  it('should create a temporary consultation (createTempConsultation())', function(done) {
+    nev.createTempConsultation(newConsultation, function(err, existingPersistentConsultation, newTempConsultation) {
       should.not.exist(err);
-      should.not.exist(existingPersistentUser);
-      should.exist(newTempUser);
+      should.not.exist(existingPersistentConsultation);
+      should.exist(newTempConsultation);
 
-      nev.options.tempUserModel.findOne({
-        email: newUser.email
+      nev.options.tempConsultationModel.findOne({
+        email: newConsultation.email
       }).exec(function(err, result) {
         should.not.exist(err);
         should.exist(result);
-
-        result.should.have.property('email').with.length(newUser.email.length);
-        result.should.have.property('pw').with.length(4);
-        newUserURL = result.GENERATED_VERIFYING_URL;
-
+        result.should.have.property('email').with.length(newConsultation.email.length);
+        newConsultationURL = result.GENERATED_VERIFYING_URL;
         done();
       });
     });
   });
 
-  it('should put the temporary user into the persistent collection (confirmTempUser())', function(done) {
-    nev.confirmTempUser(newUserURL, function(err, newUser) {
+  it('should put the temporary consultation into the persistent collection (confirmTempConsultation())', function(done) {
+    nev.confirmTempConsultation(newConsultationURL, function(err, newConsultation) {
       should.not.exist(err);
-      should.exist(newUser);
+      should.exist(newConsultation);
 
-      user.findOne({
-        email: newUser.email
+      consultation.findOne({
+        email: newConsultation.email
       }).exec(function(err, result) {
         should.not.exist(err);
         should.exist(result);
 
-        result.should.have.property('email').with.length(newUser.email.length);
-        result.should.have.property('pw').with.length(4);
+        result.should.have.property('email').with.length(newConsultation.email.length);
+  //      result.should.have.property('pw').with.length(4);
 
         done();
       });
@@ -118,6 +113,6 @@ describe('MongoDB tests', function() {
   });
 
   after(function(done) {
-    user.remove().exec(done);
+    consultation.remove().exec(done);
   });
 });

@@ -160,7 +160,7 @@ module.exports = function(mongoose) {
    * @func generateTempConsultationModel
    * @param {object} Consultation - the persistent Consultation model.
    * @return {object} the temporary consultation model
-   *
+   */
   var generateTempConsultationModel = function(Consultation, callback) {
     if (!Consultation) {
       return callback(new TypeError('Persistent consultation model undefined.'), null);
@@ -193,7 +193,7 @@ module.exports = function(mongoose) {
     return callback(null, mongoose.model(options.tempConsultationCollection));
   };
 
-*/
+
   /**
    * Helper function for actually inserting the temporary consultation into the database.
    *
@@ -204,9 +204,9 @@ module.exports = function(mongoose) {
    *   temporary consultation object as params
    * @return {function} returns the callback function
    */
-  var insertTempConsultation = function(password, tempConsultationData, callback) {
+  var insertTempConsultation = function(tempConsultationData, callback) {
     // password may or may not be hashed
-    tempConsultationData[options.passwordFieldName] = password;
+    //tempConsultationData[options.passwordFieldName] = password;
     var newTempConsultation = new options.tempConsultationModel(tempConsultationData);
 
     newTempConsultation.save(function(err, tempConsultation) {
@@ -281,12 +281,12 @@ module.exports = function(mongoose) {
 
           tempConsultationData[options.URLFieldName] = randtoken.generate(options.URLLength);
 
-          if (options.hashingFunction) {
+          /*if (options.hashingFunction) {
             return options.hashingFunction(tempConsultationData[options.passwordFieldName], tempConsultationData,
               insertTempConsultation, callback);
-          } else {
-            return insertTempConsultation(tempConsultationData[options.passwordFieldName], tempConsultationData, callback);
-          }
+          } else {*/
+          return insertTempConsultation(tempConsultationData, callback);
+         // }
         }
       });
     });
@@ -430,7 +430,7 @@ module.exports = function(mongoose) {
   return {
     options: options,
     configure: configure,
-    //generateTempConsultationModel: generateTempConsultationModel,
+    generateTempConsultationModel: generateTempConsultationModel,
     createTempConsultation: createTempConsultation,
     confirmTempConsultation: confirmTempConsultation,
     resendVerificationEmail: resendVerificationEmail,
