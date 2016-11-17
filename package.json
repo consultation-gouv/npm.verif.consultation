@@ -1,6 +1,6 @@
 {
   "name": "ogp-consultation-verification",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Confirm that the deployment of a consultation is valid",
   "main": "index.js",
   "scripts": {

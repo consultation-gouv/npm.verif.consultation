@@ -40,17 +40,17 @@ module.exports = function(mongoose) {
 
   // default options
   var options = {
-    verificationURL: 'http://example.com/email-verification/${URL}',
-    URLLength: 48,
+    verificationURL: 'http://example.com/consultation-verification/${URL}',//the URL for the user to click to confirm their consultation. ${URL} determines where the randomly generated part of the URL goes, and is needed.
+    URLLength: 48,//the length of the randomly-generated string. 
 
     // mongo-stuff
-    persistentConsultationModel: null,
-    tempConsultationModel: null,
-    tempConsultationCollection: 'temporary_consultations',
-    emailFieldName: 'email',
-    passwordFieldName: 'password',
-    URLFieldName: 'GENERATED_VERIFYING_URL',
-    expirationTime: 86400,
+    persistentConsultationModel: null,//moongose model for the persistent consultation collection
+    tempConsultationModel: null,//: the Mongoose Model for the temporary consultation collection.
+    tempConsultationCollection: 'temporary_consultations',//the name of the MongoDB collection for temporary consultations.
+    emailFieldName: 'email',//email of the user that wants to deploy a consultation
+    //passwordFieldName: 'password',
+    URLFieldName: 'GENERATED_VERIFYING_URL',//the field name for the randomly-generated UR
+    expirationTime: 86400,//the amount of time that the temporary consultation will be kept in collection, measured in seconds. 
 
     // emailing options
     transportOptions: {
@@ -63,9 +63,9 @@ module.exports = function(mongoose) {
     verifyMailOptions: {
       from: 'Do Not Reply <user@gmail.com>',
       subject: 'Confirm your account',
-      html: '<p>Please verify your account by clicking <a href="${URL}">this link</a>. If you are unable to do so, copy and ' +
+      html: '<p>Please confirm your consultation by clicking <a href="${URL}">this link</a>. If you are unable to do so, copy and ' +
         'paste the following link into your browser:</p><p>${URL}</p>',
-      text: 'Please verify your account by clicking the following link, or by copying and pasting it into your browser: ${URL}'
+      text: 'Please confirm your consultation by clicking the following link, or by copying and pasting it into your browser: ${URL}'
     },
     verifySendMailCallback: function(err, info) {
       if (err) {
@@ -129,11 +129,11 @@ module.exports = function(mongoose) {
     if (typeof options.emailFieldName !== 'string') {
       err = err || createOptionError('emailFieldName', options.emailFieldName, 'string');
     }
-
+/*
     if (typeof options.passwordFieldName !== 'string') {
       err = err || createOptionError('passwordFieldName', options.passwordFieldName, 'string');
     }
-
+*/
     if (typeof options.URLFieldName !== 'string') {
       err = err || createOptionError('URLFieldName', options.URLFieldName, 'string');
     }
@@ -160,7 +160,7 @@ module.exports = function(mongoose) {
    * @func generateTempConsultationModel
    * @param {object} Consultation - the persistent Consultation model.
    * @return {object} the temporary consultation model
-   */
+   *
   var generateTempConsultationModel = function(Consultation, callback) {
     if (!Consultation) {
       return callback(new TypeError('Persistent consultation model undefined.'), null);
@@ -193,7 +193,7 @@ module.exports = function(mongoose) {
     return callback(null, mongoose.model(options.tempConsultationCollection));
   };
 
-
+*/
   /**
    * Helper function for actually inserting the temporary consultation into the database.
    *
@@ -430,7 +430,7 @@ module.exports = function(mongoose) {
   return {
     options: options,
     configure: configure,
-    generateTempConsultationModel: generateTempConsultationModel,
+    //generateTempConsultationModel: generateTempConsultationModel,
     createTempConsultation: createTempConsultation,
     confirmTempConsultation: confirmTempConsultation,
     resendVerificationEmail: resendVerificationEmail,
