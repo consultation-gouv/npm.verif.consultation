@@ -62,7 +62,7 @@ module.exports = function(mongoose) {
     },
     verifyMailOptions: {
       from: 'Do Not Reply <user@gmail.com>',
-      subject: 'Confirm your account',
+      subject: 'Confirm your Consultation',
       html: '<p>Please confirm your consultation by clicking <a href="${URL}">this link</a>. If you are unable to do so, copy and ' +
         'paste the following link into your browser:</p><p>${URL}</p>',
       text: 'Please confirm your consultation by clicking the following link, or by copying and pasting it into your browser: ${URL}'
@@ -74,12 +74,11 @@ module.exports = function(mongoose) {
         console.log(info.response);
       }
     },
-    shouldSendConfirmation: true,
     confirmMailOptions: {
       from: 'Do Not Reply <user@gmail.com>',
       subject: 'Successfully verified!',
-      html: '<p>Your account has been successfully verified.</p>',
-      text: 'Your account has been successfully verified.'
+      html: '<p>Your consultation has been successfully verified.</p>',
+      text: 'Your consultation has been successfully verified.'
     },
     confirmSendMailCallback: function(err, info) {
       if (err) {
@@ -129,11 +128,6 @@ module.exports = function(mongoose) {
     if (typeof options.emailFieldName !== 'string') {
       err = err || createOptionError('emailFieldName', options.emailFieldName, 'string');
     }
-/*
-    if (typeof options.passwordFieldName !== 'string') {
-      err = err || createOptionError('passwordFieldName', options.passwordFieldName, 'string');
-    }
-*/
     if (typeof options.URLFieldName !== 'string') {
       err = err || createOptionError('URLFieldName', options.URLFieldName, 'string');
     }
@@ -372,9 +366,6 @@ module.exports = function(mongoose) {
               return callback(err, null);
             }
 
-            if (options.shouldSendConfirmation) {
-              sendConfirmationEmail(savedConsultation[options.emailFieldName], null);
-            }
             return callback(null, consultation);
           });
         });
