@@ -373,7 +373,7 @@ module.exports = function(mongoose) {
             }
 
             if (options.shouldSendConfirmation) {
-              sendConfirmationEmail(savedConsultation.email, null);
+              sendConfirmationEmail(savedConsultation[options.emailFieldName], null);
             }
             return callback(null, consultation);
           });
