@@ -10,6 +10,8 @@ Cela fonctionne de la façon suivante :
 
 Une consultation temporaire a un TTL de 24h par défaut mais cela peut-être configuré. 
 
+Ce module est utilisé par l'application consultation-gouv/deploiement.consultation
+
 ## Guide d'installation
 
 ### Step 1: ajouter les dépendances
@@ -63,9 +65,9 @@ module.exports = function(consultation) {
 
 Le model de consultation temportaire est généré automatiquement à partir du modèle de consultation. Un champ lui ai ajouté "GENERATED_VERIFYING_URL: String"
 
-### Step 4: Confirmer la consultation et sauvegarder là dans la collection permanente
+### Step 4: Confirmer la consultation et la sauvegarder dans la collection permanente
 
-Pour transférer une consultation de la collection temporaire à la collection permanente, il est fait appel à la fonction confirmTemConsultation, qui prend l'URL ainsi que le callback avec 2 paramètres (une erreur et l'instance de la consultation ou `null` si il y a eu des erreurs ou si la consultation n'est pas trouvée (expirée...)).
+Pour transférer une consultation de la collection temporaire à la collection permanente, il est fait appel à la fonction `confirmTempConsultation`, qui prend l'URL ainsi que le callback avec 2 paramètres (une erreur et l'instance de la consultation ou `null` si il y a eu des erreurs ou si la consultation n'est pas trouvée (expirée...)).
 
 
 ## Options
