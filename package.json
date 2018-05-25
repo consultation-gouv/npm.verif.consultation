@@ -116,7 +116,7 @@
     "lint:examples": "jshint --reporter=node_modules/jshint-stylish examples/**/*.js",
     "lint:main": "jshint --reporter=node_modules/jshint-stylish index.js",
     "lint:test": "jshint --reporter=node_modules/jshint-stylish test/*.js",
-    "test": "mocha"
+    "test": "mocha --exit"
   },
   "version": "0.5.0"
 }
