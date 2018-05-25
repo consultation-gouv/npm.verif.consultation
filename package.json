@@ -1,39 +1,75 @@
 {
-  "name": "ogp-consultation-verification",
-  "version": "0.5.0",
-  "description": "Confirm that the deployment of a consultation is valid",
-  "main": "index.js",
-  "scripts": {
-    "format:examples": "js-beautify -r examples/**/*.js",
-    "format:main": "js-beautify -r index.js",
-    "format:test": "js-beautify -s 2 -r test/*.js",
-    "format": "npm run format:main && npm run format:examples && npm run format:test",
-    "lint:examples": "jshint --reporter=node_modules/jshint-stylish examples/**/*.js",
-    "lint:main": "jshint --reporter=node_modules/jshint-stylish index.js",
-    "lint:test": "jshint --reporter=node_modules/jshint-stylish test/*.js",
-    "lint": "npm run lint:main && npm run lint:examples && npm run lint:test",
-    "test": "mocha"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Webgardener/ogp-consultation-verification"
-  },
-  "keywords": [
-    "mongodb",
-    "auth",
-    "authentication",
-    "email"
+  "_args": [
+    [
+      {
+        "raw": "consultation-verification@^0.5.0",
+        "scope": null,
+        "escapedName": "consultation-verification",
+        "name": "consultation-verification",
+        "rawSpec": "^0.5.0",
+        "spec": ">=0.5.0 <0.6.0",
+        "type": "range"
+      },
+      "/usr/src/app"
+    ]
   ],
-  "author": "Thomas Weiss",
-  "license": "ISC",
+  "_from": "consultation-verification@>=0.5.0 <0.6.0",
+  "_id": "consultation-verification@0.5.0",
+  "_inCache": true,
+  "_location": "/consultation-verification",
+  "_nodeVersion": "7.7.1",
+  "_npmOperationalInternal": {
+    "host": "packages-12-west.internal.npmjs.com",
+    "tmp": "tmp/consultation-verification-0.5.0.tgz_1491574570481_0.4738538258243352"
+  },
+  "_npmUser": {
+    "name": "webgardener75",
+    "email": "thomas.weiss33@gmail.com"
+  },
+  "_npmVersion": "4.1.2",
+  "_phantomChildren": {
+    "hooks": "0.2.1",
+    "mongodb": "1.4.38",
+    "mpath": "0.1.1",
+    "mpromise": "0.4.3",
+    "mquery": "1.10.0",
+    "muri": "1.1.0",
+    "regexp-clone": "0.0.1",
+    "sliced": "0.0.5"
+  },
+  "_requested": {
+    "raw": "consultation-verification@^0.5.0",
+    "scope": null,
+    "escapedName": "consultation-verification",
+    "name": "consultation-verification",
+    "rawSpec": "^0.5.0",
+    "spec": ">=0.5.0 <0.6.0",
+    "type": "range"
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/consultation-verification/-/consultation-verification-0.5.0.tgz",
+  "_shasum": "41dd51f2084ed376105e0ab3e4499bcaa54238a2",
+  "_shrinkwrap": null,
+  "_spec": "consultation-verification@^0.5.0",
+  "_where": "/usr/src/app",
+  "author": {
+    "name": "Thomas Weiss"
+  },
+  "bugs": {
+    "url": "https://github.com/consultation-gouv/npm.verif.consultation/issues"
+  },
   "dependencies": {
     "mongoose": "~3.8.0",
     "nodemailer": "^1.3.0",
     "rand-token": "^0.2.1"
   },
+  "description": "Confirm that the deployment of a consultation is valid",
   "devDependencies": {
     "async": "^1.4.2",
     "bcryptjs": "^2.3.0",
+    "bluebird": "*",
     "body-parser": "^1.9.3",
     "chai": "*",
     "express": "^4.10.4",
@@ -41,7 +77,46 @@
     "jshint": "*",
     "jshint-stylish": "*",
     "mocha": "*",
-    "nodemailer-stub-transport": "^1.0.0",
-    "bluebird": "*"
-  }
+    "nodemailer-stub-transport": "^1.0.0"
+  },
+  "directories": {},
+  "dist": {
+    "shasum": "41dd51f2084ed376105e0ab3e4499bcaa54238a2",
+    "tarball": "https://registry.npmjs.org/consultation-verification/-/consultation-verification-0.5.0.tgz"
+  },
+  "gitHead": "320353a6d38bea8f7858a2a19da96d41e2703e7a",
+  "homepage": "https://github.com/consultation-gouv/npm.verif.consultation#readme",
+  "keywords": [
+    "mongodb",
+    "auth",
+    "authentication",
+    "email"
+  ],
+  "license": "ISC",
+  "main": "index.js",
+  "maintainers": [
+    {
+      "name": "webgardener75",
+      "email": "thomas.weiss33@gmail.com"
+    }
+  ],
+  "name": "consultation-verification",
+  "optionalDependencies": {},
+  "readme": "ERROR: No README data found!",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/consultation-gouv/npm.verif.consultation.git"
+  },
+  "scripts": {
+    "format": "npm run format:main && npm run format:examples && npm run format:test",
+    "format:examples": "js-beautify -r examples/**/*.js",
+    "format:main": "js-beautify -r index.js",
+    "format:test": "js-beautify -s 2 -r test/*.js",
+    "lint": "npm run lint:main && npm run lint:examples && npm run lint:test",
+    "lint:examples": "jshint --reporter=node_modules/jshint-stylish examples/**/*.js",
+    "lint:main": "jshint --reporter=node_modules/jshint-stylish index.js",
+    "lint:test": "jshint --reporter=node_modules/jshint-stylish test/*.js",
+    "test": "mocha --exit"
+  },
+  "version": "0.5.0"
 }
