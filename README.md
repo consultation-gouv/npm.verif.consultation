@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/consultation-gouv/npm.verif.consultation.svg?branch=master)](https://travis-ci.org/consultation-gouv/npm.verif.consultation)
+
 # Fonctionnement
 
 Ce module permet de confirmer par email une demande de déploiement de consultation. 
